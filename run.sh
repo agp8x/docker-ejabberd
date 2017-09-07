@@ -10,7 +10,7 @@ source "${EJABBERD_HOME}/scripts/lib/functions.sh"
 readonly nodename=$(get_nodename)
 
 is_zero ${ERLANG_NODE} \
-    && export ERLANG_NODE="ejabberd"
+    && export ERLANG_NODE="ejabberd@localhost"
 
 ## backward compatibility
 # if ERLANG_NODE is true reset it to "ejabberd" and add
@@ -18,8 +18,6 @@ is_zero ${ERLANG_NODE} \
 # else: export ${ERLANG_NODE} with nodename
 if (is_true ${ERLANG_NODE}); then
     export ERLANG_NODE="ejabberd@${nodename}"
-else
-    export ERLANG_NODE="${ERLANG_NODE}@${nodename}"
 fi
 
 
@@ -77,17 +75,18 @@ trap _trap SIGTERM SIGINT
 case "$@" in
     start)
         pre_scripts
-        tail -F ${LOGDIR}/crash.log \
+        tail -n 0 -F ${LOGDIR}/crash.log \
                 ${LOGDIR}/error.log \
                 ${LOGDIR}/erlang.log &
         echo "Starting ejabberd..."
-        exec ${EJABBERDCTL} "live" &
+        exec ${EJABBERDCTL} "foreground" &
         child=$!
         ${EJABBERDCTL} "started"
         post_scripts
         wait $child
     ;;
     live)
+        pre_scripts
         echo "Starting ejabberd in 'live' mode..."
         exec ${EJABBERDCTL} "live"
     ;;

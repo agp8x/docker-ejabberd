@@ -13,7 +13,7 @@ make_snakeoil_certificate() {
 
     openssl req -subj "/CN=${domain}" \
                 -new \
-                -newkey rsa:2048 \
+                -newkey rsa:4096 \
                 -days 365 \
                 -nodes \
                 -x509 \
@@ -72,6 +72,10 @@ if file_exist ${SSLCERTDOMAIN} ; then
     done
 fi
 
+
+is_true ${EJABBERD_SKIP_MAKE_SSLCERT} \
+    && echo "Skip certificate generation" \
+    && exit 0
 
 # generate host ssl cert if missing
 file_exist ${SSLCERTHOST} \
